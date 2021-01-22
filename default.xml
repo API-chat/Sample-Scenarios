@@ -1,0 +1,237 @@
+﻿<states>
+  <!-- This is the entry point for the chatbot. Every user persists in some State. Start is the default state of every user. -->
+  <state name="Start">
+    <!-- Transition is a way to move from state to state depending on the input. When user input contains text similar to the input attribute it will trigger the corresponding transition. pending_keyboard determines what keyboard should be rendered after the transition. The transition body determines what message should be delivered after the transition. State determine which state user will be after the transition -->
+    <transition input="messages" next="Messages" pending_keyboard="Simple Message;Long Message;Multy-message;Markdown;Render Link, NoRender Link;No-stops;⬅️ Back">This state show examples of most messages</transition>
+    <!-- no-stop attribute is explained in Messages state  -->
+    <transition input="keyboards" next="Keyboards" no_stop="true">This state shows examples of the supported keyboards</transition>
+    <transition input="inputs" next="Inputs" no_stop="true">This state shows examples of input usages.</transition>
+    <transition input="media" next="Media" no_stop="true">This state shows examples of media representation</transition>
+    <transition input="forms" next="Forms" no_stop="true">This state shows basic virtual form (based on memory) usages</transition>
+    <transition input="memory" next="Memory" no_stop="true">This state shows advanced memory usages</transition>
+    <transition input="api" next="API" no_stop="true">This state shows how to use `action` to integrate with any REST API</transition>
+    <transition input="nlu" next="Start" no_stop="true">Sorry! This sample does not ready yet</transition>
+    <transition input="zapier" next="Start" no_stop="true">Sorry! This sample does not ready yet</transition>
+    <!-- This is catch-all transition. It always should be the last one -->
+    <transition input="*" next="Start" pending_keyboard="Messages,Keyboards;Inputs,Media;Forms,Memory,API;NLU,Zapier">
+      👋 Hello {username}! Thank you for trying [API.chat](https://api.chat). This sample scenario will demo you most of the features available in the API.chat bot engine.
+      All features are available from the keyboard below. You can change and tinker with that as much as you please.
+      ℹ️ Some useful built-in commands ℹ️
+      /cancel - back to Start state
+      /chatid - get your unique channel Chat id
+      /force State - change state forcifully
+    </transition>
+  </state>
+
+  <!-- This state show examples of most messages  -->
+  <state name="Messages">
+    <transition input="simple" next="Start">This simple message. It can have text on any language|языке|ভাষা  and even emoji 👌. Now back to Start state. Send any text to show options</transition>
+    <transition input="long" next="Messages">This is a long message, it will be probably splitted to several messages depending on channel message max-size: Lorum ipsum.... Now we stay in the Messages state. Send any text to show options</transition>
+    <transition input="multy" next="Messages">This simple message.===This is the second message - they splitted with splitter and showed separatelly===Now we stay in the Messages state. Send any text to show options</transition>
+    <transition input="markdown" next="Messages">This *is* test of **markdown**. It should_work_great and _fast_. Also it should [never](http://www.example.com/) `crash`. Now we stay in the **Messages** state. Send *any text* to show options</transition>
+    <transition input="render" render_url="true" next="Start">This [link](https://api.chat) will be showed as preview (if supported by channel)===Now we stay in the Messages state. Send any text to show options</transition>
+    <transition input="norender" next="Messages">This [link](https://api.chat) will **not** be showed as preview (if supported by channel)===Now we stay in the Messages state. Send any text to show options</transition>
+    <transition input="nostop" next="Messages" no_stop="true">**no_stop** is one of the most useful and important attribute here.===It work quite simple: after transition triggered, text (from transition body) is added to results chain, but processing does not stop here. Same input will be processed in the new state, triggering other transition. That's could be repeated up to 10 times, after transition without no_stop triggered entire array of results will be send to user.===**no_stop** transition can have empty body, and pending_keyboard from last transition in chain will be shown.</transition>
+    <transition input="back" next="Start" no_stop="true"/>
+    <transition input="*" next="Messages" pending_keyboard="Simple Message;Long Message;Multy-message;Markdown;Render Link, NoRender Link;Nostops;⬅️ Back">Please select one of the option</transition>
+  </state>
+
+  <!-- This state show examples of most supported keyboards. API.chat will do best to adapt universal keyboard string to platform-specific. Due to this most of advances keyboard features not supported for now -->
+  <state name="Keyboards">
+    <transition input="single" next="Keyboards" pending_keyboard="A,B,C" no_stop="true">Single line keyboard</transition>
+    <transition input="multy" next="Keyboards" pending_keyboard="A,B,C;D,E,F" no_stop="true">Multy line keyboard</transition>
+    <transition input="emoji" next="Keyboards" pending_keyboard="🐩, 🐈 Cat, :),💳,⚔️" no_stop="true">Emoji keyboard</transition>
+    <transition input="emojitext" next="Keyboards" pending_keyboard="👍 Thank you;🤷‍♂️ Doesn't help">Emoji and text keyboard</transition>
+    <transition input="numeric" next="Keyboards" pending_keyboard="1️⃣ ,2️⃣,3️⃣,;4️⃣,5️⃣,6️⃣;7️⃣,8️⃣,9️⃣" no_stop="true">Emoji numeric keyboard</transition>
+    <transition input="back" next="Start" no_stop="true"/>
+    <transition input="*" next="Keyboards" pending_keyboard="Single line;Multy line;Emoji;EmojiText;Numeric;⬅️ Back">Please select one of the option</transition>
+  </state>
+
+  <!-- This state show examples of input usages. When user writes anything into bot it tokenize user message, stemm them and searching for best fit transition with levinshtein distance. You can also bypass this and use Regex instead with @ symbol. Note that first matching transition will be triggered -->
+  <state name="Inputs">
+    <transition input="hello" next="Inputs" no_stop="true">You send me: {msg}</transition>
+    <transition input="like" next="Inputs" no_stop="true">You send me text with “Likes”, ”liked”, ”likely” or ”liking”</transition>
+    <transition input="@\S+@\S+\.\S+" next="Inputs" no_stop="true">You send me email: {msg}</transition>
+    <transition input="@([0-9])+" next="Inputs" no_stop="true">You send me number: {msg}</transition>
+    <transition input="exact" next="Inputs" no_stop="true">You can bypass stemming with *exact* attribute.</transition>
+    <transition input="exact string" exact="true" next="Inputs" no_stop="true">You can bypass stemming and analyze entire string as input with *exact* attribute. Note that first matched input triggered</transition>
+    <!-- You can analyze sentences with no_stop attribut for very basics nlu tasks -->
+    <transition input="enable" next="Chain_1" no_stop="true">You want to enable</transition>
+    <transition input="disable" next="Chain_1" no_stop="true">You want to disable</transition>
+    <!-- Another example -->
+    <transition input="request" next="Chain_2" no_stop="true">You want to request</transition>
+    <!-- Combination of input and keyboard allows you to build interactive logical trees, like in interactive fiction games -->
+    <transition input="CAVE" next="TreeAB" pending_keyboard="Enter;Go South,Go West">
+      YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK BUILDING.
+      AROUND YOU IS A FOREST. A SMALL STREAM FLOWS OUT OF THE BUILDING AND DOWN A GULLY.
+    </transition>
+    <transition input="back" next="Start" no_stop="true"/>
+    <transition input="*" next="Inputs" pending_keyboard="Colossal Cave Adventure;⬅️ Back">Send me any text</transition>
+  </state>
+  <!-- Chain_1 example -->
+  <state name="Chain_1">
+    <transition input="lamp" next="Chain_1_1" no_stop="true">lamp</transition>
+    <transition input="fan" next="Chain_1_1" no_stop="true">fan</transition>
+    <transition input="*" next="Chain_1_1" no_stop="true">something</transition>
+  </state>
+  <state name="Chain_1_1">
+    <transition input="@(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})" next="Inputs" no_stop="true">at time {input}</transition>
+    <transition input="tomorrow" next="Inputs" no_stop="true">tomorrow</transition>
+    <transition input="friday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="*" next="Inputs" no_stop="true"></transition>
+  </state>
+  <!-- Chain_2 example -->
+  <state name="Chain_2">
+    <transition input="@(report|chart|diagram|table)" next="Chain_2" no_stop="true">this {input}</transition>
+    <transition input="monday" next="Chain_2" no_stop="true">at {input}</transition>
+    <transition input="tuesday" next="Chain_2" no_stop="true">at {input}</transition>
+    <transition input="wednesday" next="Chain_2" no_stop="true">at {input}</transition>
+    <transition input="thursday" next="Chain_2" no_stop="true">at {input}</transition>
+    <transition input="friday" next="Chain_2" no_stop="true">at {input}</transition>
+    <transition input="saturday" next="Chain_2" no_stop="true">at {input}</transition>
+    <transition input="sunday" next="Chain_2" no_stop="true">at {input}</transition>
+    <transition input="*" next="Inputs" no_stop="true">Whole {msg}</transition>
+  </state>
+  <state name="Chain_2_1">
+    <transition input="monday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="tuesday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="wednesday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="thursday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="friday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="saturday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="sunday" next="Inputs" no_stop="true">at {input}</transition>
+    <transition input="*" next="Inputs" no_stop="true">Whole {msg}</transition>
+  </state>
+  <!-- A glimps of Colossal Cave Adventure -->
+  <state name="TreeAB">
+    <transition input="enter" next="TreeSouth">YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING. THERE ARE SOME KEYS ON THE GROUND HERE. THERE IS A SHINY BRASS LAMP NEARBY. THERE IS FOOD HERE. THERE IS A BOTTLE OF WATER HERE.</transition>
+    <transition input="south" next="TreeSouth">YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A ROCKY BED.</transition>
+    <transition input="west" next="TreeWest">
+      YOU FELL INTO A PIT AND BROKE EVERY BONE IN YOUR BODY!===NOW YOU'VE REALLY DONE IT!  I'M OUT OF ORANGE SMOKE!  YOU DON'T EXPECT
+      ME TO DO A DECENT REINCARNATION WITHOUT ANY ORANGE SMOKE, DO YOU?
+    </transition>
+    <transition input="*" next="TreeAB">YOU CAN'T GO THIS WAY</transition>
+  </state>
+  <state name="TreeSouth">
+    <transition input="*" next="Inputs" no_stop="true">YOU DIED</transition>
+  </state>
+  <state name="TreeWest">
+    <transition input="yes" next="Inputs" no_stop="true">OKAY, IF YOU'RE SO SMART, DO IT YOURSELF!  I'M LEAVING!</transition>
+    <transition input="no" next="Inputs" no_stop="true">OK</transition>
+    <transition input="*" next="Inputs" no_stop="true">YOU DEAD</transition>
+  </state>
+  <!-- Inputs END -->
+
+  <!-- This state show examples of media. You can send media urls as separate message or as a part of text message -->
+  <state name="Media">
+    <transition input="img" next="Media" no_stop="true">https://placekitten.com/g/300/300</transition>
+    <transition input="img-mult" next="Media" no_stop="true">Message before image===https://placekitten.com/g/300/300===Message after image</transition>
+    <transition input="img-link" next="Media" render_url="true" no_stop="true">Link to image https://placekitten.com/g/300/300</transition>
+    <transition input="gif" next="Media" no_stop="true">https://i.gifer.com/2UU.gif</transition>
+    <transition input="gif-mult" next="Media" no_stop="true">Message before gif===https://i.gifer.com/2UU.gif===Message after gif</transition>
+    <transition input="gif-link" next="Media" render_url="true" no_stop="true">Link to gif https://i.gifer.com/2UU.gif</transition>
+    <transition input="mp3" next="Media" no_stop="true">Sorry! This sample does not ready yet</transition>
+    <transition input="mp4" next="Media" no_stop="true">Sorry! This sample does not ready yet</transition>
+    <transition input="back" next="Start" no_stop="true"/>
+    <transition input="*" next="Media" pending_keyboard="img,img-mult,img-link;gif,gif-mult,gif-link;mp3,mp4;⬅️ Back">Please select one of the option</transition>
+  </state>
+
+  <!-- Virtual forms behave as in-memory storage where you can collect information from user, store it, and deliver it eiter to text, email or API -->
+  <state name="Forms">
+    <!-- Note that question asked here, but answer saved in next state -->
+    <transition input="simple" next="Form1">What is your name?</transition>
+    <transition input="email" next="Form1B">What is your name?</transition>
+    <transition input="api" next="Form1C">What is your name?</transition>
+    <transition input="simple-kb" next="Form1D" pending_keyboard="Bob,Alice">What is your name?</transition>
+    <transition input="back" next="Start" no_stop="true"/>
+    <transition input="*" next="Forms" pending_keyboard="Simple,Email,API;Simple-kb;⬅️ Back">Please select one of the option</transition>
+  </state>
+
+  <state name="Form1">
+    <!-- Note that question asked here, but answer saved in next state -->
+    <transition input="*" next="Form2" acion="$memory.save_as:name">What is your age?</transition>
+  </state>
+  <state name="Form2">
+    <transition input="*" next="Form3" acion="$memory.save_as:age" no_stop="true" />
+  </state>
+  <state name="Form3">
+    <transition input="*" next="Forms" morphology="memory">your age {memory:age} and your name is {memory:name}</transition>
+  </state>
+
+  <state name="Form1B">
+    <transition input="*" next="Form2B" acion="$memory.save_as:name">What is your age?</transition>
+  </state>
+  <state name="Form2B">
+    <transition input="*" next="Form3B" acion="$memory.save_as:age" no_stop="true" />
+  </state>
+  <state name="Form3B">
+    <transition input="*" next="Forms" action="$memory.deliver_to:op@chatfirst.co">Form sent to email</transition>
+  </state>
+
+  <state name="Form1C">
+    <transition input="*" next="Form2C" acion="$memory.save_as:name">What is your age?</transition>
+  </state>
+  <state name="Form2C">
+    <transition input="*" next="Form3C" acion="$memory.save_as:age" no_stop="true" />
+  </state>
+  <state name="Form3C">
+    <transition input="*" next="Forms" morphology="api.memory" action="TODO" action_type="post">Form sent to API</transition>
+  </state>
+
+  <state name="Form1D">
+    <transition input="*" next="Form2D" acion="$memory.save_as:name" pending_keyboard="10,20,30,40">What is your age?</transition>
+  </state>
+  <state name="Form2D">
+    <transition input="*" next="Form3D" acion="$memory.save_as:age" no_stop="true" />
+  </state>
+  <state name="Form3D">
+    <transition input="*" next="Forms" acion="$memory.clean">your age {memory:age} and your name is {memory:name}</transition>
+  </state>
+  <!-- Form end -->
+
+  <!-- Memory is a short-temp storage dictionary for anything user inputed. you can collect data, append data, send it to email or on API endpoint. Memory used for virtual forms and surveys. -->
+  <state name="Memory">
+    <transition input="long" next="Memory" no_stop="true">"Long" memory is a permanent storage of user parameters, inputs and etc. It's is ready for usage, but not available through API yet.</transition>
+    <transition input="short" next="MemoryShort" no_stop="true">"Short" memory is a temporary storage of user parameters, inputs and etc. It's store data for around 4-10 hours in form of dictionary</transition>
+    <transition input="back" next="Start" no_stop="true"/>
+    <transition input="*" next="Memory" pending_keyboard="Short Memory,Long Memory;⬅️ Back">Please select one of the option</transition>
+  </state>
+
+  <state name="MemoryShort">
+    <transition input="save" next="MemoryShortSave">Anything you write will be stored in memory with key</transition>
+    <transition input="append" next="MemoryShortAppend" action="$memory.append_to:key">Anything you write will be append in memory to current *key* value</transition>
+    <transition input="append-key" exact="true" next="MemoryShortAppend" action="$memory.append_to:key:value">*value* will be append to *key*</transition>
+    <transition input="clean" next="MemoryShort" action="$memory.clean">Memory cleaned</transition>
+    <transition input="swow" morphology="memory" next="MemoryShort" no_stop="true">Key value {memory:key}</transition>
+    <transition input="deliver" next="MemoryShort" action="$memory.deliver_to:op@chatfirst.co" no_stop="true" />
+
+    <transition input="deliver-get" next="MemoryShort">TODO</transition>
+    <transition input="deliver-post" next="MemoryShort">TODO</transition>
+
+    <transition input="back" next="Memory" no_stop="true"/>
+    <transition input="*" next="MemoryShort" pending_keyboard="Save,Append,Append-Key;Show,Clean;Deliver,Deliver-get,Deliver-post;⬅️ Back">Here are all possible operation with short memory</transition>
+  </state>
+
+  <state name="MemoryShortSave">
+    <transition input="*" next="MemoryShort" action="$memory.save_as:key" no_stop="true">Saved, NoStop will process input again to show menu</transition>
+  </state>
+
+  <state name="MemoryShortAppend">
+    <transition input="*" next="MemoryShort" action="$memory.append_to:key" no_stop="true">Appended, NoStop will process input again to show menu</transition>
+  </state>
+  <!-- Memory end -->
+  <!-- API is the most complex yet most powerfull feature of API.chat. Use *action* attribute to pass any endpoint (as far as it implement action spec). For now methods should return ExternalMessage dto. I plan to improve it later to support   -->
+  <state name="API">
+    <transition input="get" next="API" action="/api/EchoGet" />
+    <transition input="post" next="API" action="/api/EchoPost" />
+    <transition input="state" next="API" action="/api/EchoPost?ForcedState=API2" />
+    <transition input="input" next="API" action="/api/EchoPost?ForcedState=API2&ForcedMessage=Hello" />
+    <transition input="keyboard" next="API" action="/api/EchoPost" />
+    <transition input="back" next="Memory" no_stop="true"/>
+    <transition input="*" pending_keyboard="GET,POST,Force State;Force Message,Force Keyboard;⬅️ Back"  next="API">Here are several use-cases you can achieve with API</transition>
+  </state>
+  <state name="API2">
+    <transition input="hello" next="API">Goes by forced message</transition>
+    <transition input="*" next="API" no_stop="true">Going back</transition>
+  </state>
+</states>
