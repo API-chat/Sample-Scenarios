@@ -1,4 +1,5 @@
-﻿<states>
+<bot>﻿
+<states>
   <!-- This is the entry point for the chatbot. Every user persists in some State. Start is the default state of every user. -->
   <state name="Start">
     <!-- Transition is a way to move from state to state depending on the input. When user input contains text similar to the input attribute it will trigger the corresponding transition. pending_keyboard determines what keyboard should be rendered after the transition. The transition body determines what message should be delivered after the transition. State determine which state user will be after the transition -->
@@ -235,3 +236,4 @@
     <transition input="*" next="API" no_stop="true">Going back</transition>
   </state>
 </states>
+</bot>
