@@ -1,7 +1,7 @@
 <bot>
   <states>
     <state name="Start">
-      <transition input="*" next="ChooseOS" render_url="false" no_stop="true">Welcome to *VSCode shortcuts helper*. This chatbot built as a part of demo reel of [API.chat](https://api.chat) chatbot platform. Source code availiable [here]()</transition>
+      <transition input="*" next="ChooseOS" render_url="false" no_stop="true">Welcome to *VSCode shortcuts helper*. This chatbot built as a part of demo reel of [API.chat](https://api.chat) chatbot platform. Source code availiable [here](https://github.com/API-chat/Sample-Scenarios/blob/main/vscode_helper_bot.xml)</transition>
     </state>
     <state name="ChooseOS">
       <transition input="windows" next="StartWindows" no_stop="true"/>
