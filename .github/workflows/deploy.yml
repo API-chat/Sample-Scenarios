@@ -28,6 +28,5 @@ jobs:
           curl -v -X PUT "https://bot.api.chat/v1/bots/$BOT_NAME/scenario" 
           -H "Content-Type: application/xml" 
           -H "Cache-Control: no-cache" 
-          -H "Ocp-Apim-Subscription-Key: $SUB_KEY" 
-          -H "Ocp-Apim-Trace: True"
+          -H "Ocp-Apim-Subscription-Key: $SUB_KEY"
           --data @$BOT_FILE
