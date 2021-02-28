@@ -1,0 +1,36 @@
+<bot>
+   <states>
+      <state name="Start">
+         <transition input="message" next="MessageToZapier">Send me any message</transition>
+         <transition input="form" next="FormToZapier" no_stop="true">Choose your action</transition>
+         <transition input="*" next="Start" pending_keyboard="Message to Zapier, Form to Zapier">This chatbot demonstrates usage of zapier. Please replace action URLs in catch-all transition in `MessageToZapier` and `FormToZapierSubmit` states.===Choose your action</transition>
+      </state>
+      <!-- Demonstrate how to send user message to Zapier -->
+      <state name="MessageToZapier">
+         <transition input="back" state="Start" no_stop="true" />
+         <transition input="*" next="MessageToZapier" action_type="post" morphology="msg" action="https://hooks.zapier.com/hooks/.../silent" pending_keyboard="Back">Sent data to zapier</transition>
+      </state>
+      <!-- Demonstrate how to send form data to Zapier -->
+      <state name="FormToZapier">
+         <transition input="begin" next="Step1">Welcome to test survey===What is your name?</transition>
+		 <transition input="back" state="Start" no_stop="true" />
+         <transition input="*" next="FormToZapier" pending_keyboard="Begin,Back">Welcome to demo form chatbot. It will populate virtual form and send it to zapier</transition>
+      </state>
+      <state name="Step1">
+         <transition input="*" next="Step2" action="$memory.save_as:Name">Thank you.===How often do you use the product or service?</transition>
+      </state>
+      <state name="Step2">
+         <transition input="*" next="Step3" action="$memory.save_as:HowOften">How can we improve your experience with the company?</transition>
+      </state>
+      <state name="Step3">
+         <transition input="*" next="StepFinal" action="$memory.save_as:HowImprove" pending_keyboard="Yes,No">May we contact you to follow up on these responses?</transition>
+      </state>
+      <state name="StepFinal">
+         <transition input="No" next="Start" action="$memory.clean" no_stop="true">Thank you for participating</transition>
+         <transition input="*" next="FormToZapierSubmit" action="$memory.save_as:MayContact" no_stop="true">Thank you for participating</transition>
+      </state>
+      <state name="FormToZapierSubmit">
+         <transition input="*" next="Start" action_type="post" morphology="form" action="https://hooks.zapier.com/hooks/.../silent">Form is sent</transition>
+      </state>
+   </states>
+</bot>
